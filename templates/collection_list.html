@@ -27,29 +27,12 @@
             </div>
         </div>
         <div class="row mt-5">
-            <h4 class="col-1">
-                Collections
-            </h4>
-            <a href="{% url 'fetchCollection' %}" class="col-1">
-                <button class="btn btn-success">
-                    Fetch
-                </button>
-            </a>
+            <h2 class="col-1">
+                {{ fileName }}
+            </h2>
         </div>
-        <div class="row mt-5">
-            <table class="table table-striped">
-                {% for collection in collections %}
-                <tr>
-                    <td>
-                        <a href="{% url 'collectionList' collection.fileName %}">
-                            <p>
-                                {{ collection.date }}
-                            </p>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
+        <div class="row mt-5" style="background-color: lightgrey">
+
         </div>
     </div>
 </body>
