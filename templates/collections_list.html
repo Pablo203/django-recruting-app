@@ -1,56 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SW Collections</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-</head>
-<body>
-    <div class="container-fluid">
-        <div class="row" style="background-color: gold;">
-            <div class="d-inline col-2 p-2">
-                <h3>
-                    <b>
-                        Star Wars
-                    </b>
-                    Explorer
-                </h3>
-            </div>
-            <div class="d-inline col-1 mt-3">
-                <a href="{% url 'collectionsList' %}">
+{% extends 'base.html' %}
+{% block content %}
+<div class="row mt-5">
+    <h4 class="col-1">
+        Collections
+    </h4>
+    <a href="{% url 'fetchCollection' %}" class="col-1">
+        <button class="btn btn-success">
+            Fetch
+        </button>
+    </a>
+</div>
+<div class="row mt-5">
+    <table class="table table-striped">
+        {% for collection in collections %}
+        <tr>
+            <td>
+                <a href="{% url 'collectionList' collection.fileName %}">
                     <p>
-                        Collections
+                        {{ collection.date }}
                     </p>
                 </a>
-            </div>
-        </div>
-        <div class="row mt-5">
-            <h4 class="col-1">
-                Collections
-            </h4>
-            <a href="{% url 'fetchCollection' %}" class="col-1">
-                <button class="btn btn-success">
-                    Fetch
-                </button>
-            </a>
-        </div>
-        <div class="row mt-5">
-            <table class="table table-striped">
-                {% for collection in collections %}
-                <tr>
-                    <td>
-                        <a href="{% url 'collectionList' collection.fileName %}">
-                            <p>
-                                {{ collection.date }}
-                            </p>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-    </div>
-</body>
-</html>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

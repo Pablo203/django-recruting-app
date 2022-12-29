@@ -33,6 +33,17 @@ class CollectionListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['fileName'] = self.kwargs['fileName']
+        context['csvFileContent'] = etl.fromcsv('csvFiles/a' + self.kwargs['fileName'])
+        context['csvFileContent'] = etl.rowslice(context['csvFileContent'], 10)
+        return context
+
+class CollectionListViewShowMore(CollectionListView, ListView):
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['fileName'] = self.kwargs['fileName']
+        context['csvFileContent'] = etl.fromcsv('csvFiles/a' + self.kwargs['fileName'])
+        context['csvFileContent'] = etl.rowslice(context['csvFileContent'], 20)
         return context
 
 def fetchData():
@@ -40,14 +51,13 @@ def fetchData():
   # Export the data for use in future steps
   return r.json()
 
-def checkForChar(stringToCheck):
-    for char in stringToCheck:
+def changeDateFormat(dateStr):
+    for char in dateStr:
         if char in ascii_uppercase:
-            stringToCheck = stringToCheck.replace(char, ' ')
-    return stringToCheck
-
-def changeDateFormat(dateField):
-    _logger.info(datetime.strptime(dateField, '%y-%m-%d %H:%M:%S'))
+            dateStr = dateStr.replace(char, '')
+    dateStr = datetime.strptime(dateStr, '%Y-%m-%d%H:%M:%S.%f')
+    dateStr = dateStr.date()
+    return dateStr
 
 def cleanCsv(filePath, fileName):
     table1 = etl.fromcsv(filePath)
@@ -57,13 +67,12 @@ def cleanCsv(filePath, fileName):
     table5 = etl.cutout(table4, 'starships')
     table6 = etl.cutout(table5, 'created')
     table7 = etl.cutout(table6, 'url')
-    #table8 = etl.addfield(table7, 'date', lambda row: row['edited'])
-    #table9 = etl.convert(table8, 'date', lambda row: checkForChar(row))
+    table8 = etl.addfield(table7, 'date', lambda row: row['edited'])
+    table9 = etl.convert(table8, 'date', lambda row: changeDateFormat(row))
+    table10 = etl.cutout(table9, 'edited')
+    table11 = etl.convert(table10, 'homeworld', lambda row: requests.get(row).json()['name'])
     
-    table10 = etl.convert(table7, 'homeworld', lambda row: requests.get(row).json()['name'])
-    #table11 = etl.convert(table10, 'date', lambda row: changeDateFormat(row))
-    #table12 = etl.convert(table11, 'date', lambda row: row.datetime.strftime('%y-%m-%d'))
-    etl.tocsv(table10, ("csvFiles/a" + fileName))
+    etl.tocsv(table11, ("csvFiles/a" + fileName))
     if os.path.exists(filePath):
         os.remove(filePath)
 
