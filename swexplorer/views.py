@@ -46,6 +46,45 @@ class CollectionListViewShowMore(CollectionListView, ListView):
         context['csvFileContent'] = etl.rowslice(context['csvFileContent'], 20)
         return context
 
+
+class CollectionCountListView(ListView):
+    model = Collection
+
+    context_object_name = 'collection'
+
+    template_name = 'collection_count_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['columns'] = self.kwargs['columns']
+        context['fileName'] = self.kwargs['fileName']
+        context['csvFile'] = etl.fromcsv('csvFiles/a' + self.kwargs['fileName'])
+        context['csvHeaders'] = etl.rowslice(context['csvFile'], 0)
+
+        if self.kwargs['columns'] != '0':
+            columns = self.kwargs['columns'].split("-")
+            columns.pop()
+
+            table1 = etl.cut(context['csvFile'], columns)
+            context['csvContent'] = etl.rowslice(table1, 0)
+            headers = table1.header()
+
+            #Prepare field to count combinations, using joined fields values
+            counterTable = etl.addfield(table1, 'counterField', lambda row: ','.join(f"{row[name]}" for name in headers))
+            #Count combinations using earlier prepared field
+            countedCombinations = etl.valuecounter(counterTable, 'counterField')
+
+            #Remove duplicates from table to prepare data for showing on website
+            counterTableNoDup = etl.mergeduplicates(counterTable, 'counterField')
+            #Move table with counted values to the end
+            counterTableNoDup = etl.movefield(counterTableNoDup, 'counterField', len(headers))
+            #Replace field with combined values from all fields with counted values number
+            counterTableNoDup = etl.convert(counterTableNoDup, 'counterField', lambda row: countedCombinations[row])
+
+            context['csvCount'] = counterTableNoDup
+
+        return context
+
 def fetchData():
   r = requests.get('https://swapi.dev/api/people')
   # Export the data for use in future steps
@@ -61,18 +100,13 @@ def changeDateFormat(dateStr):
 
 def cleanCsv(filePath, fileName):
     table1 = etl.fromcsv(filePath)
-    table2 = etl.cutout(table1, 'films')
-    table3 = etl.cutout(table2, 'species')
-    table4 = etl.cutout(table3, 'vehicles')
-    table5 = etl.cutout(table4, 'starships')
-    table6 = etl.cutout(table5, 'created')
-    table7 = etl.cutout(table6, 'url')
-    table8 = etl.addfield(table7, 'date', lambda row: row['edited'])
-    table9 = etl.convert(table8, 'date', lambda row: changeDateFormat(row))
-    table10 = etl.cutout(table9, 'edited')
-    table11 = etl.convert(table10, 'homeworld', lambda row: requests.get(row).json()['name'])
+    table2 = etl.cutout(table1, 'films', 'species', 'vehicles', 'starships', 'created', 'url')
+    table3 = etl.addfield(table2, 'date', lambda row: row['edited'])
+    table4 = etl.convert(table3, 'date', lambda row: changeDateFormat(row))
+    table5 = etl.cutout(table4, 'edited')
+    table6 = etl.convert(table5, 'homeworld', lambda row: requests.get(row).json()['name'])
     
-    etl.tocsv(table11, ("csvFiles/a" + fileName))
+    etl.tocsv(table6, ("csvFiles/a" + fileName))
     if os.path.exists(filePath):
         os.remove(filePath)
 

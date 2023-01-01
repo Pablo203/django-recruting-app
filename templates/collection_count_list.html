@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mt-5">
+    <h2 class="col-1">
+        {{ fileName }}
+    </h2>
+    <a href="{% url 'collectionList' fileName %}">
+        <button class="btn btn-link btn-outline-secondary" style="text-decoration: none;">
+            Return to collection
+        </button>
+    </a>
+    <div class="col-5 mt-3">
+        <div class="btn-group" role="group">
+            {% for headers in csvHeaders %}
+                {% for header in headers %}
+                    <button type="button" onclick="getColumns('{{ header }}')" id="{{ header }}" {% if header in columns %}disabled{% endif %} class="btn btn-link btn-outline-secondary categoryBtn">
+                        {{ header }}
+                    </button>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<div class="row mt-5">
+    {% if csvContent %}
+        <table class="table table-striped">
+            {% for column in csvContent %}
+                <tr>
+                    {% for field in column %}
+                        <th>
+                            {{ field }}
+                        </th>
+                    {% endfor %}
+                    <th>
+                        Count
+                    </th>
+                </tr>
+            {% endfor %}
+            {% for row in csvCount %}
+                {% if forloop.first %}
+                {% else %}
+                <tr>
+                    {% for field in row %}
+                    <td>
+                        {{ field }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    {% endif %}
+</div>
+<script>
+    function getColumns(header){
+        element = document.getElementById(header)
+        element.disabled = true;
+        var buttons = document.getElementsByClassName('categoryBtn');
+        var fileName = '{{ fileName }}'
+        var disabledButtons = "";
+        for(let i=0; i < buttons.length; i++){
+            if(buttons[i].disabled){
+                disabledButtons += buttons[i].id + '-'
+            }
+        }
+        console.log(disabledButtons);
+        url = '/sw/' + fileName + '/count/' + disabledButtons + '/'
+        console.log(url)
+        return window.location.href = url;
+    }
+    
+</script>
+{% endblock %}

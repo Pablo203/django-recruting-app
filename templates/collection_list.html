@@ -4,6 +4,12 @@
     <h2 class="col-1">
         {{ fileName }}
     </h2>
+    <a href="{% url 'collectionCount' fileName 0 %}">
+        <button class="btn btn-link btn-outline-secondary" style="text-decoration: none;">
+            Value count
+        </button>
+    </a>
+    
 </div>
 <div class="row mt-5">
     
@@ -26,7 +32,7 @@
         
     </table>
     <a href="{% url 'collectionList20' fileName %}">
-        <button class="btn btn-link btn-outline-secondary">
+        <button class="btn btn-link btn-outline-secondary" style="text-decoration: none;">
             Show more
         </button>
     </a>
