@@ -14,7 +14,7 @@
         <div class="btn-group" role="group">
             {% for headers in csvHeaders %}
                 {% for header in headers %}
-                    <button type="button" onclick="getColumns('{{ header }}')" id="{{ header }}" {% if header in columns %}disabled{% endif %} class="btn btn-link btn-outline-secondary categoryBtn">
+                    <button type="button" onclick="getColumns('{{ header }}')" id="{{ header }}" {% if header in columns %}disabled{% endif %} class="btn btn-link btn-outline-secondary categoryBtn" style="text-decoration: none;">
                         {{ header }}
                     </button>
                 {% endfor %}
